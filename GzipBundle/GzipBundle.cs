@@ -32,20 +32,20 @@ namespace GzipBundle
             {
                 httpResponse = httpContext.Response;
                 acceptEncoding = httpContext.Request.Headers["Accept-Encoding"];
-                if (!ResponseEncoded(httpResponse) && !string.IsNullOrEmpty(acceptEncoding))
+                if (!string.IsNullOrEmpty(acceptEncoding) && !ResponseEncoded(httpResponse))
                 {
                     if (acceptEncoding.Contains(DecompressionMethods.GZip.ToString()))
                     {
                         httpResponse.Filter = new GZipStream(httpResponse.Filter, CompressionMode.Compress);
                         httpResponse.AddHeader("Content-Encoding", DecompressionMethods.GZip.ToString().ToLowerInvariant());
+                        httpContext.Response.AppendHeader("Vary", "Content-Encoding");
                     }
                     else if (acceptEncoding.Contains(DecompressionMethods.Deflate.ToString()))
                     {
                         httpResponse.Filter = new DeflateStream(httpResponse.Filter, CompressionMode.Compress);
                         httpResponse.AddHeader("Content-Encoding", DecompressionMethods.Deflate.ToString().ToLowerInvariant());
+                        httpContext.Response.AppendHeader("Vary", "Content-Encoding");
                     }
-
-                    httpContext.Response.AppendHeader("Vary", "Content-Encoding");
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace GzipBundle
 
         private static bool ResponseEncoded(HttpResponseBase httpResponse)
         {
-            return httpResponse != null && (httpResponse.Filter is GZipStream || httpResponse.Filter is DeflateStream);
+            return httpResponse.Filter == null || !(httpResponse.Filter is GZipStream || httpResponse.Filter is DeflateStream);
         }
     }
 }

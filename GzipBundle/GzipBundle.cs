@@ -32,7 +32,7 @@ namespace GzipBundle
             {
                 httpResponse = httpContext.Response;
                 acceptEncoding = httpContext.Request.Headers["Accept-Encoding"];
-                if (!string.IsNullOrEmpty(acceptEncoding) && !ResponseEncoded(httpResponse))
+                if (!string.IsNullOrEmpty(acceptEncoding) && ResponseNotEncoded(httpResponse))
                 {
                     if (acceptEncoding.Contains(DecompressionMethods.GZip.ToString()))
                     {
@@ -55,7 +55,7 @@ namespace GzipBundle
             return httpContext != null && httpContext.Request != null && httpContext.Response != null;
         }
 
-        private static bool ResponseEncoded(HttpResponseBase httpResponse)
+        private static bool ResponseNotEncoded(HttpResponseBase httpResponse)
         {
             return httpResponse.Filter == null || !(httpResponse.Filter is GZipStream || httpResponse.Filter is DeflateStream);
         }
